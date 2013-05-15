@@ -14,24 +14,30 @@ OptionParser.new do |opt|
   end
 end.parse!
 
-puts "Width: #{options[:width]}"
-
 options[:width] = 1280 if options[:width].nil?
 url = "http://xkcd.com/rss.xml"
 img_dir = "/home/nathan/projects/xkcd/output/#{options[:width]}"
 
-Dir.mkdir("output/#{options[:width]}") unless File.directory?("output/#{options[:width]}")
+puts "writing to #{img_dir}"
+
+Dir.mkdir(img_dir) unless File.directory?(img_dir)
 
 open(url) do |rss|
   feed = RSS::Parser.parse(rss)
   puts "Downloading recent comics..."
   feed.items.each do |item|
-    puts "  #{item.title}"
+    print "  #{item.title}"
     url = parse_attr("src", item.description)
-    comic = Comic.new(url, "#{img_dir}/#{item.title}.png")
-    comic.size_to(options[:width])
-    comic.annotate(item.title, parse_attr("title", item.description))
-    comic.save
+    file_path = "#{img_dir}/#{item.title}.png"
+    if File.file? file_path
+      puts " (found)"
+    else
+      comic = Comic.new(url, file_path)
+      comic.size_to(options[:width])
+      comic.annotate(item.title, parse_attr("title", item.description))
+      comic.save
+      puts
+    end
   end
   puts "Done!"
 end
