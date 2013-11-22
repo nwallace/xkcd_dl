@@ -16,10 +16,12 @@ end.parse!
 
 options[:width] = 1280 if options[:width].nil?
 url = "http://xkcd.com/rss.xml"
-img_dir = "/home/nathan/projects/xkcd/output/#{options[:width]}"
+output_dir = File.expand_path(File.dirname(__FILE__)) + "/output"
+img_dir = output_dir + "/#{options[:width]}"
 
 puts "writing to #{img_dir}"
 
+Dir.mkdir(output_dir) unless File.directory?(output_dir)
 Dir.mkdir(img_dir) unless File.directory?(img_dir)
 
 open(url) do |rss|
